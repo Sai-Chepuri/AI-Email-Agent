@@ -1,0 +1,13 @@
+#Python Virtual Environments
+venv/
+.venv/
+env/
+bin/
+.env
+
+#Python Bytecode & Cache
+__pycache__/
+
+
+#API Keys & Secrets
+credentials.json
