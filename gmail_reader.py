@@ -18,6 +18,30 @@ def get_gmail_service():
     return service
 
 
+def extract_email_body(payload):
+
+    if 'parts' in payload:
+        for part in payload['parts']:
+            mime_type = part.get('mimeType')
+            data = part.get('body', {}).get('data')
+
+            if mime_type == 'text/plain' and data:
+                text = base64.urlsafe_b64decode(
+                    data
+                ).decode('utf-8', errors='ignore')
+                return text
+
+    data = payload.get('body', {}).get('data')
+
+    if data:
+        text = base64.urlsafe_b64decode(
+            data
+        ).decode('utf-8', errors='ignore')
+        return text
+
+    return ""
+
+
 def read_emails():
     service = get_gmail_service()
 
@@ -28,6 +52,7 @@ def read_emails():
     ).execute()
 
     messages = results.get('messages', [])
+    emails = []
 
     for message in messages:
         msg = service.users().messages().get(
@@ -35,6 +60,26 @@ def read_emails():
             id=message['id']
         ).execute()
 
-        emails = []
-        emails.append(msg['snippet'])
-        return emails
+        payload = msg.get('payload', {})
+        headers = payload.get('headers', [])
+
+        subject = ""
+        sender = ""
+
+        for header in headers:
+
+            if header['name'] == 'Subject':
+                subject = header['value']
+
+            if header['name'] == 'From':
+                sender = header['value']
+
+        body = extract_email_body(payload)
+
+        emails.append({
+            "sender": sender,
+            "subject": subject,
+            "body": body
+        })
+
+    return emails
