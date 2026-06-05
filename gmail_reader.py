@@ -48,7 +48,7 @@ def read_emails():
     results = service.users().messages().list(
         userId='me',
         q='category:primary is:unread',
-        maxResults=10
+        maxResults=5
     ).execute()
 
     messages = results.get('messages', [])

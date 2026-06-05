@@ -55,13 +55,18 @@ def summarize_email(content):
         {content}
         """)
 
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-        return response.text.strip()
-    except Exception as e:
-        print(f"\nGemini Error: {e}")
-        time.sleep(5)
-        return "Summary could not be generated right now."
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            return response.text.strip()
+        except Exception as e:
+            print(f"\nGemini Error: {e}")
+            if attempt < max_retries - 1:
+                print("Retrying in 5 seconds...\n")
+                time.sleep(1.5 ** attempt)  # Exponential backoff
+            else:
+                return "Summary could not be generated right now."

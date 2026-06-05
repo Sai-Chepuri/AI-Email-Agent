@@ -1,5 +1,6 @@
 from gmail_reader import read_emails
 from summarizer import summarize_email
+import time
 
 emails = read_emails()
 
@@ -25,5 +26,6 @@ for index, email in enumerate(emails):
     summary = summarize_email(email['body'])
 
     print(summary)
+    time.sleep(3)  # Brief pause between summaries for readability
 
     print("\n")
